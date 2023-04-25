@@ -18,4 +18,12 @@ export class UsersService {
   fetchUsers(): Promise<User[]> {
     return this.userRepository.find();
   }
+
+  findUserByEmail(email: string): Promise<User> {
+    return this.userRepository.findOneBy({ email });
+  }
+
+  findUserById(id: number): Promise<User> {
+    return this.userRepository.findOneBy({ id });
+  }
 }

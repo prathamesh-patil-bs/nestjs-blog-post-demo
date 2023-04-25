@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { hash } from 'bcrypt';
+import { compare } from 'bcrypt';
 import { USER_ROLE } from 'src/common/app.constants';
 
 @Entity()
@@ -41,5 +42,9 @@ export class User {
   @BeforeInsert()
   async hashPassword() {
     this.password = await hash(this.password, 10);
+  }
+
+  validatePassword(password: string) {
+    return compare(password, this.password);
   }
 }
