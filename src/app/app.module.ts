@@ -19,7 +19,6 @@ import { configValidationSchema } from 'config.schema';
       validationSchema: configValidationSchema,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         return {

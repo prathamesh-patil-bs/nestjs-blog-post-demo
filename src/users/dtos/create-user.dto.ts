@@ -5,6 +5,7 @@ import {
   IsString,
   IsNotEmpty,
   IsPositive,
+  IsEmail,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -24,6 +25,7 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsEmail()
   email: string;
 
   @IsString()
