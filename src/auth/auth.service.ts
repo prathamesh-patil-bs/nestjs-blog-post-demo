@@ -2,11 +2,13 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService, JwtSignOptions } from '@nestjs/jwt';
+import { JwtSignOptions } from '@nestjs/jwt';
 import { hash } from 'bcrypt';
 
+import { JwtHelper } from '../utils/jwt.util';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 import { SignInDto } from 'src/users/dtos/sign-in.dto';
 import { User } from 'src/users/user.entity';
@@ -15,13 +17,15 @@ import { ForgotPasswordDto } from './dtos/forgot-passoword.dto';
 import { ResetPasswordBodyDto } from './dtos/reset-password.dto';
 import { JwtPayloadType } from './auth.type';
 import { ChangePasswordDto } from './dtos/change-password.dto';
+import { RedisUtils } from 'src/utils/redis.util';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UsersService,
-    private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly jwtHelper: JwtHelper,
+    private readonly redisUtils: RedisUtils,
   ) {}
 
   signUp(createUserDto: CreateUserDto): Promise<User> {
@@ -39,13 +43,28 @@ export class AuthService {
 
   async signIn(user: Omit<User, 'password'>) {
     const signInPayload = { userId: user.id };
-    const signInOptions: JwtSignOptions = {
+
+    const accessTokenSignInOptions: JwtSignOptions = {
       expiresIn: '7d',
       subject: user.id.toString(),
     };
-    const token = await this.jwtService.signAsync(signInPayload, signInOptions);
+    const refreshTokenSignInOptions: JwtSignOptions = {
+      expiresIn: '365d',
+      subject: user.id.toString(),
+    };
+
+    const accessToken = await this.jwtHelper.signAccessToken(
+      signInPayload,
+      accessTokenSignInOptions,
+    );
+    const refreshToken = await this.jwtHelper.signRefreshToken(
+      signInPayload,
+      refreshTokenSignInOptions,
+    );
+
     return {
-      access_token: `Bearer ${token}`,
+      accessToken: `Bearer ${accessToken}`,
+      refreshToken,
     };
   }
 
@@ -66,10 +85,11 @@ export class AuthService {
       id: existingUser.id,
     };
 
-    const token = await this.jwtService.signAsync(
-      payload,
-      this.getTokenSignInOptions(existingUser.id, '15m', secret),
-    );
+    const token = await this.jwtHelper.signAccessToken(payload, {
+      subject: existingUser.id.toString(),
+      expiresIn: '15m',
+      secret,
+    });
 
     const domain = this.configService.get<string>('SERVER_DOMAIN');
     const passwordResetLink = `${domain}/api/auth/reset-password/${existingUser.id}/${token}`;
@@ -96,7 +116,7 @@ export class AuthService {
     );
 
     try {
-      const payload: JwtPayloadType = await this.jwtService.verifyAsync(token, {
+      const payload: JwtPayloadType = await this.jwtHelper.verifyToken(token, {
         secret,
       });
       user = await this.userService.findUserById(payload.userId);
@@ -130,24 +150,42 @@ export class AuthService {
     return 'Password changed successfully!';
   }
 
+  async getAccessTokenUsingRefreshToken(refreshToken: string) {
+    const { userId } = await this.jwtHelper.verifyToken(refreshToken);
+    const storedToken = await this.redisUtils.getValue(userId.toString());
+
+    if (storedToken !== refreshToken) throw new UnauthorizedException();
+
+    const accessTokenSignInOptions: JwtSignOptions = {
+      expiresIn: '7d',
+      subject: userId.toString(),
+    };
+    const refreshTokenSignInOptions: JwtSignOptions = {
+      expiresIn: '365d',
+      subject: userId.toString(),
+    };
+
+    const accessToken = await this.jwtHelper.signAccessToken(
+      { userId },
+      accessTokenSignInOptions,
+    );
+
+    refreshToken = await this.jwtHelper.signRefreshToken(
+      { userId },
+      refreshTokenSignInOptions,
+    );
+
+    return {
+      accessToken: 'Bearer ' + accessToken,
+      refreshToken,
+    };
+  }
+
   private getPasswordTokenSigningSecret(
     jwtSecret: string,
     userPassword: string,
   ) {
     return jwtSecret + userPassword;
-  }
-
-  private getTokenSignInOptions(
-    subject: number,
-    expiresIn: string,
-    secret = '',
-  ): JwtSignOptions {
-    const payload = {
-      expiresIn,
-      subject: subject.toString(),
-    };
-    if (secret) payload['secret'] = secret;
-    return payload;
   }
 
   private hashPasswrd(password: string): Promise<string> {

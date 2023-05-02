@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Param,
@@ -60,5 +61,12 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
     return this.authService.changePassword(changePasswordDto, user);
+  }
+
+  @Post('/refresh-token')
+  getAccessToken(@Body('refreshToken') refreshToken: string) {
+    if (!refreshToken)
+      throw new BadRequestException('refreshToken is required');
+    return this.authService.getAccessTokenUsingRefreshToken(refreshToken);
   }
 }

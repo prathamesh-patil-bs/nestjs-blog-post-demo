@@ -8,4 +8,7 @@ export const configValidationSchema = Joi.object({
   DB_PASSWORD: Joi.string().required(),
   JWT_SECRET: Joi.string().required(),
   SALT_ROUND: Joi.number().default(10).required(),
+  SERVER_DOMAIN: Joi.string().default('http://localhost:3000').required(),
+  REDIS_HOST: Joi.string().default('127.0.0.1').required(),
+  REDIS_PORT: Joi.number().default(6379).required()
 });

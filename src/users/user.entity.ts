@@ -5,12 +5,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
 import { hash } from 'bcrypt';
 import { compare } from 'bcrypt';
 import { USER_ROLE } from 'src/common/app.constants';
+import { Post } from 'src/posts/post.entity';
+import { Comment } from 'src/comments/comment.entity';
 
-@Entity()
+@Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -32,6 +35,12 @@ export class User {
 
   @Column({ enum: USER_ROLE, default: USER_ROLE.USER })
   role: string;
+
+  @OneToMany(() => Post, (post) => post.authorId, { eager: false })
+  posts: Post[];
+
+  @OneToMany(() => Comment, (comment) => comment.userId, { eager: false })
+  comments: Comment[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
