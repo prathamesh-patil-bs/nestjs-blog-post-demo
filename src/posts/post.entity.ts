@@ -24,7 +24,7 @@ export class Post {
 
   @ManyToOne(() => User, (user) => user.posts, { eager: false })
   @JoinColumn({ name: 'author_id' })
-  authorId: User;
+  author: User;
 
   @OneToMany(() => Comment, (comment) => comment.postId, { eager: false })
   comments: Comment[];

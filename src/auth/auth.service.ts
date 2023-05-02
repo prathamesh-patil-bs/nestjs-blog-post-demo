@@ -15,7 +15,7 @@ import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { ForgotPasswordDto } from './dtos/forgot-passoword.dto';
 import { ResetPasswordBodyDto } from './dtos/reset-password.dto';
-import { JwtPayloadType } from './auth.type';
+import { JwtPayloadType } from './types/auth.type';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { RedisUtils } from 'src/utils/redis.util';
 

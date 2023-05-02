@@ -36,7 +36,7 @@ export class User {
   @Column({ enum: USER_ROLE, default: USER_ROLE.USER })
   role: string;
 
-  @OneToMany(() => Post, (post) => post.authorId, { eager: false })
+  @OneToMany(() => Post, (post) => post.author, { eager: false })
   posts: Post[];
 
   @OneToMany(() => Comment, (comment) => comment.userId, { eager: false })

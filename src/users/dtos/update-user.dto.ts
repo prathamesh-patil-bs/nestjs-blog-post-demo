@@ -1,34 +1,35 @@
 import {
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
   Max,
   Min,
-  IsNumber,
-  IsString,
-  IsNotEmpty,
-  IsPositive,
-  IsEmail,
 } from 'class-validator';
 
-export class CreateUserDto {
+export class UpdateUserDto {
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   firstName: string;
 
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   lastName: string;
 
-  @Min(12)
-  @Max(100)
   @IsNumber()
   @IsPositive()
+  @Min(12)
+  @Max(100)
+  @IsOptional()
   age: number;
 
   @IsString()
   @IsNotEmpty()
   @IsEmail()
+  @IsOptional()
   email: string;
-
-  @IsString()
-  @IsNotEmpty()
-  password: string;
 }
