@@ -20,7 +20,7 @@ export class PostsService {
     return this.postsRepository.findOneBy({ id: postId });
   }
 
-  createPost(user: TCurrentUser, createPostDto: CreatePostDto) {
+  createPost(user: TCurrentUser, createPostDto: CreatePostDto): Promise<Post> {
     const post = this.postsRepository.create({
       ...createPostDto,
       author: user,

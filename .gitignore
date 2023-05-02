@@ -38,3 +38,6 @@ lerna-debug.log*
 .env.development
 .env.production
 .env.test
+
+# documentation
+documentation
