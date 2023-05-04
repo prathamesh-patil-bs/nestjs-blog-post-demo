@@ -36,10 +36,18 @@ export class User {
   @Column({ enum: USER_ROLE, default: USER_ROLE.USER })
   role: string;
 
-  @OneToMany(() => Post, (post) => post.author, { eager: false })
+  @OneToMany(() => Post, (post) => post.author, {
+    eager: false,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   posts: Post[];
 
-  @OneToMany(() => Comment, (comment) => comment.userId, { eager: false })
+  @OneToMany(() => Comment, (comment) => comment.userId, {
+    eager: false,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   comments: Comment[];
 
   @CreateDateColumn({ name: 'created_at' })

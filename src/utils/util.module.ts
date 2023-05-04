@@ -1,8 +1,8 @@
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { Global, Module } from '@nestjs/common';
 import { RedisUtils } from './redis.util';
 import { JwtHelper } from './jwt.util';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 
 @Global()
 @Module({

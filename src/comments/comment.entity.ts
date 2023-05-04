@@ -18,13 +18,25 @@ export class Comment {
   @Column()
   text: string;
 
-  @ManyToOne(() => Post, (post) => post.comments, { eager: false })
-  @JoinColumn({ name: 'post_id' })
-  postId: Post;
+  @Column({ nullable: true, name: 'post_id' })
+  postId: number;
 
-  @ManyToOne(() => User, (user) => user.comments, { eager: false })
+  @ManyToOne(() => Post, (post) => post.comments, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'post_id' })
+  post: Post;
+
+  @Column({ name: 'user_id' })
+  userId: number;
+
+  @ManyToOne(() => User, (user) => user.comments, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
-  userId: User;
+  user: User;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

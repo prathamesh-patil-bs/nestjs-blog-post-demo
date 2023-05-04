@@ -18,26 +18,27 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { User } from 'src/users/user.entity';
+import { TCurrentUser } from 'src/users/types/current-user.type';
+import { Serialize } from 'src/interceptors/serialize.interceptor';
+import { UserDto } from 'src/users/dtos/user.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Serialize(UserDto)
   @Post('/sign-up')
-  signUp(@Body() createUserDto: CreateUserDto) {
+  signUp(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.authService.signUp(createUserDto);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('/sign-in')
-  signIn(@Req() req: Request) {
+  signIn(@Req() req: Request): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     return this.authService.signIn(req.user);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('/token')
-  getPayload(@CurrentUser() user: Omit<User, 'password'>) {
-    return user;
   }
 
   @Post('/forgot-password')
@@ -51,13 +52,15 @@ export class AuthController {
     @Param('token') token: string,
     @Body() resetPasswordBodyDto: ResetPasswordBodyDto,
   ) {
+    console.log('ID ==> ', id);
+    console.log('TOKEN ==> ', token);
     return this.authService.resetPassword({ id, token }, resetPasswordBodyDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('/change-password')
   changePassword(
-    @CurrentUser() user: Omit<User, 'password'>,
+    @CurrentUser() user: TCurrentUser,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
     return this.authService.changePassword(changePasswordDto, user);
@@ -67,6 +70,13 @@ export class AuthController {
   getAccessToken(@Body('refreshToken') refreshToken: string) {
     if (!refreshToken)
       throw new BadRequestException('refreshToken is required');
+
     return this.authService.getAccessTokenUsingRefreshToken(refreshToken);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/logout')
+  logout(@CurrentUser() user: TCurrentUser) {
+    return this.authService.logoutUser(user);
   }
 }

@@ -18,6 +18,7 @@ import { ResetPasswordBodyDto } from './dtos/reset-password.dto';
 import { JwtPayloadType } from './types/auth.type';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { RedisUtils } from 'src/utils/redis.util';
+import { TCurrentUser } from 'src/users/types/current-user.type';
 
 @Injectable()
 export class AuthService {
@@ -71,6 +72,7 @@ export class AuthService {
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
     const { email } = forgotPasswordDto;
     const existingUser = await this.userService.findUserByEmail(email);
+
     if (!existingUser)
       throw new NotFoundException(`No such user is registered with "${email}"`);
 
@@ -82,7 +84,7 @@ export class AuthService {
 
     const payload = {
       email: existingUser.email,
-      id: existingUser.id,
+      userId: existingUser.id,
     };
 
     const token = await this.jwtHelper.signAccessToken(payload, {
@@ -119,7 +121,12 @@ export class AuthService {
       const payload: JwtPayloadType = await this.jwtHelper.verifyToken(token, {
         secret,
       });
+
+      console.log(payload);
+
       user = await this.userService.findUserById(payload.userId);
+
+      console.log('use ====> ', user);
       if (user) {
         user.password = await this.hashPasswrd(password);
         await this.userService.saveUser(user);
@@ -150,7 +157,9 @@ export class AuthService {
     return 'Password changed successfully!';
   }
 
-  async getAccessTokenUsingRefreshToken(refreshToken: string) {
+  async getAccessTokenUsingRefreshToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const { userId } = await this.jwtHelper.verifyToken(refreshToken);
     const storedToken = await this.redisUtils.getValue(userId.toString());
 
@@ -191,5 +200,9 @@ export class AuthService {
   private hashPasswrd(password: string): Promise<string> {
     const saltRounds = this.configService.get<number>('SALT_ROUND');
     return hash(password, saltRounds);
+  }
+
+  logoutUser(user: TCurrentUser) {
+    return this.redisUtils.deleteValue(user.id.toString());
   }
 }

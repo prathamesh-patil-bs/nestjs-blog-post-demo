@@ -16,4 +16,8 @@ export class RedisUtils {
   getValue(key: string) {
     return this.client.get(key);
   }
+
+  deleteValue(key: string) {
+    return this.client.del([key]);
+  }
 }

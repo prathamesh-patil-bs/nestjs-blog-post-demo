@@ -9,7 +9,7 @@ export class UserRepository extends Repository<User> {
     super(User, dataSource.createEntityManager());
   }
 
-  async createUser(createUserDto: CreateUserDto) {
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
     const user = this.create({ ...createUserDto });
     return this.save(user);
   }

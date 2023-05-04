@@ -1,9 +1,9 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { Request } from 'express';
-import { User } from 'src/users/user.entity';
+import { TCurrentUser } from 'src/users/types/current-user.type';
 
 export const CurrentUser = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): Omit<User, 'password'> => {
+  (data: never, ctx: ExecutionContext): TCurrentUser => {
     const request: Request = ctx.switchToHttp().getRequest();
     const user = request.user;
     return user;

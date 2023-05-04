@@ -22,11 +22,21 @@ export class Post {
   @Column({ name: 'title' })
   title: string;
 
-  @ManyToOne(() => User, (user) => user.posts, { eager: false })
+  @Column({ nullable: true, name: 'author_id' })
+  authorId: number;
+
+  @ManyToOne(() => User, (user) => user.posts, {
+    eager: false,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'author_id' })
   author: User;
 
-  @OneToMany(() => Comment, (comment) => comment.postId, { eager: false })
+  @OneToMany(() => Comment, (comment) => comment.postId, {
+    eager: false,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   comments: Comment[];
 
   @CreateDateColumn({ name: 'created_at' })
