@@ -19,6 +19,7 @@ import { JwtPayloadType } from './types/auth.type';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { RedisUtils } from 'src/utils/redis.util';
 import { TCurrentUser } from 'src/users/types/current-user.type';
+import { SignInResponseDto } from './dtos/signIn-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -42,7 +43,7 @@ export class AuthService {
     return existingUser;
   }
 
-  async signIn(user: Omit<User, 'password'>) {
+  async signIn(user: Omit<User, 'password'>): Promise<SignInResponseDto> {
     const signInPayload = { userId: user.id };
 
     const accessTokenSignInOptions: JwtSignOptions = {

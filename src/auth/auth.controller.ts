@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  HttpCode,
   Param,
   ParseIntPipe,
   Post,
@@ -21,23 +22,44 @@ import { User } from 'src/users/user.entity';
 import { TCurrentUser } from 'src/users/types/current-user.type';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from 'src/users/dtos/user.dto';
+import {
+  ApiConflictResponse,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { SignInResponseDto } from './dtos/signIn-response.dto';
+import { ApiUnauthorizedResponseDto } from 'src/common/api-error-responses/ApiUnauthorizeResponse.dto';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Serialize(UserDto)
   @Post('/sign-up')
+  @Serialize(UserDto)
+  @ApiResponse({
+    description: 'Newly Created User',
+    type: UserDto,
+    status: 201,
+  })
+  @ApiConflictResponse({
+    description: 'User with email already exists!',
+  })
   signUp(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.authService.signUp(createUserDto);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('/sign-in')
-  signIn(@Req() req: Request): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
+  @HttpCode(200)
+  @ApiResponse({
+    status: 200,
+    description: 'Api access credentials.',
+    type: SignInResponseDto,
+  })
+  @ApiUnauthorizedResponse({ type: ApiUnauthorizedResponseDto })
+  signIn(@Req() req: Request): Promise<SignInResponseDto> {
     return this.authService.signIn(req.user);
   }
 

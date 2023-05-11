@@ -10,15 +10,15 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { PostDto } from './dtos/post.dto';
 import { PostsService } from './posts.service';
 import { Post as PostEntity } from './post.entity';
 import { CreatePostDto } from './dtos/create-post.dto';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
-import { TCurrentUser } from 'src/users/types/current-user.type';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UpdatePostDto } from './dtos/update-post.dto';
+import { TCurrentUser } from 'src/users/types/current-user.type';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
-import { PostDto } from './dtos/post.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('/users/:userId/posts')
