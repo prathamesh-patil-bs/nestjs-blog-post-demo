@@ -31,6 +31,7 @@ async function bootstrap() {
     .addTag('Users', "User APi's")
     .addTag('Posts', "Posts APi's")
     .addTag('Comments', "Comments APi's")
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

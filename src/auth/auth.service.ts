@@ -20,6 +20,7 @@ import { ChangePasswordDto } from './dtos/change-password.dto';
 import { RedisUtils } from 'src/utils/redis.util';
 import { TCurrentUser } from 'src/users/types/current-user.type';
 import { SignInResponseDto } from './dtos/signIn-response.dto';
+import { ForgotPasswordResponseDto } from './dtos/forgot-password-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -70,12 +71,14 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+  async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<ForgotPasswordResponseDto> {
     const { email } = forgotPasswordDto;
     const existingUser = await this.userService.findUserByEmail(email);
 
     if (!existingUser)
-      throw new NotFoundException(`No such user is registered with "${email}"`);
+      throw new NotFoundException(`No such user found with "${email}"`);
 
     const jwtTokenSecret = this.configService.get<string>('JWT_SECRET');
     const secret = this.getPasswordTokenSigningSecret(
@@ -104,7 +107,7 @@ export class AuthService {
   async resetPassword(
     resetPasswordParamsDto: { id: number; token: string },
     resetPasswordBodyDto: ResetPasswordBodyDto,
-  ) {
+  ): Promise<void> {
     const { password } = resetPasswordBodyDto;
     const { id, token } = resetPasswordParamsDto;
 
@@ -123,11 +126,8 @@ export class AuthService {
         secret,
       });
 
-      console.log(payload);
-
       user = await this.userService.findUserById(payload.userId);
 
-      console.log('use ====> ', user);
       if (user) {
         user.password = await this.hashPasswrd(password);
         await this.userService.saveUser(user);
@@ -135,14 +135,14 @@ export class AuthService {
         throw new BadRequestException('Invalid token!');
       }
     } catch (error) {
-      throw new BadRequestException('Invalid Link');
+      throw new BadRequestException('Invalid link!');
     }
   }
 
   async changePassword(
     changePasswordDto: ChangePasswordDto,
     currentUser: Omit<User, 'password'>,
-  ) {
+  ): Promise<string> {
     const { oldPassword, newPassword } = changePasswordDto;
 
     const user = await this.userService.findUserById(currentUser.id);

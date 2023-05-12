@@ -86,20 +86,6 @@ export class CommentsService {
     const isUserOwnsPost = commentInfo.post.authorId === user.id;
     const isUserOwnsComment = commentInfo.userId === user.id;
 
-    console.log('isUserAdmin', isUserAdmin, '!isUserAdmin', !isUserAdmin);
-    console.log(
-      'isUserOwnsPost',
-      isUserOwnsPost,
-      '!isUserOwnsPost',
-      !isUserOwnsPost,
-    );
-    console.log(
-      'isUserOwnsComment',
-      isUserOwnsComment,
-      '!isUserOwnsComment',
-      !isUserOwnsComment,
-    );
-
     if (!isUserAdmin && !isUserOwnsPost && !isUserOwnsComment) {
       throw new UnauthorizedException();
     }

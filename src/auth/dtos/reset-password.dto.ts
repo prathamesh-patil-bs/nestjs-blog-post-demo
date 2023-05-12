@@ -12,7 +12,7 @@ export class ResetPasswordBodyDto {
   password: string;
 
   @ApiProperty({
-    description: 'New password matching to new password.',
+    description: 'Password matching to new password.',
     example: 'New-Password',
   })
   @IsString()

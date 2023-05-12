@@ -9,6 +9,16 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiNotFoundResponse,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
@@ -22,17 +32,14 @@ import { User } from 'src/users/user.entity';
 import { TCurrentUser } from 'src/users/types/current-user.type';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from 'src/users/dtos/user.dto';
-import {
-  ApiConflictResponse,
-  ApiResponse,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
 import { SignInResponseDto } from './dtos/signIn-response.dto';
-import { ApiUnauthorizedResponseDto } from 'src/common/api-error-responses/ApiUnauthorizeResponse.dto';
+import { ApiUnauthorizedResponseDto } from 'src/common/api-responses/ApiUnauthorizeResponse.dto';
+import { ForgotPasswordResponseDto } from './dtos/forgot-password-response.dto';
+import { ApiNotFoundResponseDto } from 'src/common/api-responses/ApiNotFoundResponse.dto';
+import { ApiBadRequestResponseDto } from 'src/common/api-responses/ApiBadRequestResponseDto';
 
-@ApiTags('Auth')
 @Controller('auth')
+@ApiTags('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -64,41 +71,88 @@ export class AuthController {
   }
 
   @Post('/forgot-password')
-  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+  @HttpCode(200)
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset link',
+    type: ForgotPasswordResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Resource not found',
+    type: ApiNotFoundResponseDto,
+  })
+  forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<ForgotPasswordResponseDto> {
     return this.authService.forgotPassword(forgotPasswordDto);
   }
 
   @Post('/reset-password/:id/:token')
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Id of user.', example: 1 })
+  @ApiParam({
+    name: 'token',
+    description: 'Token sent in response of forgot password',
+    example: 'w6OvJaI83ln6uLLc7yRT2VHoDQ1_ShY43M4oTD3XpPo',
+  })
+  @ApiResponse({
+    description: 'Success response of password reset.',
+    status: 200,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request exception',
+    type: ApiBadRequestResponseDto,
+  })
   resetPassword(
     @Param('id', ParseIntPipe) id: number,
     @Param('token') token: string,
     @Body() resetPasswordBodyDto: ResetPasswordBodyDto,
-  ) {
-    console.log('ID ==> ', id);
-    console.log('TOKEN ==> ', token);
+  ): Promise<void> {
     return this.authService.resetPassword({ id, token }, resetPasswordBodyDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('/change-password')
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 200,
+    description: 'Success message of password change.',
+  })
+  @ApiBadRequestResponse({ type: ApiBadRequestResponseDto })
+  @ApiNotFoundResponse({ type: ApiNotFoundResponseDto })
   changePassword(
     @CurrentUser() user: TCurrentUser,
     @Body() changePasswordDto: ChangePasswordDto,
-  ) {
+  ): Promise<string> {
     return this.authService.changePassword(changePasswordDto, user);
   }
 
   @Post('/refresh-token')
-  getAccessToken(@Body('refreshToken') refreshToken: string) {
-    if (!refreshToken)
-      throw new BadRequestException('refreshToken is required');
+  @HttpCode(200)
+  @ApiResponse({
+    status: 200,
+    description: 'Api access credentials.',
+    type: SignInResponseDto,
+  })
+  @ApiBadRequestResponse({ type: ApiBadRequestResponseDto })
+  @ApiUnauthorizedResponse({ type: ApiUnauthorizedResponseDto })
+  getAccessToken(
+    @Body('refreshToken') refreshToken: string,
+  ): Promise<SignInResponseDto> {
+    if (!refreshToken) {
+      throw new BadRequestException('refreshToken is required!');
+    }
 
     return this.authService.getAccessTokenUsingRefreshToken(refreshToken);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('/logout')
-  logout(@CurrentUser() user: TCurrentUser) {
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ type: ApiUnauthorizedResponseDto })
+  @ApiResponse({ description: 'Success response of logout.', status: 200 })
+  logout(@CurrentUser() user: TCurrentUser): Promise<number> {
     return this.authService.logoutUser(user);
   }
 }

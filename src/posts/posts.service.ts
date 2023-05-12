@@ -32,9 +32,6 @@ export class PostsService {
       authorId: userId,
     });
 
-    if (!post)
-      throw new NotFoundException(`No such post found with id : ${postId}`);
-
     return post;
   }
 
@@ -83,7 +80,7 @@ export class PostsService {
 
     await this.postsRepository.delete({ id: postId });
 
-    return { message: 'Post deleted successfully' };
+    return { message: 'Post deleted successfully.' };
   }
 
   async deletePostsOfUser(userId: number): Promise<void> {
