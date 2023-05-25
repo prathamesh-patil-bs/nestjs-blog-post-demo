@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -8,24 +9,22 @@ import { UserRepository } from './users.repository';
 import { User } from './user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { PostsService } from 'src/posts/posts.service';
-import { CommentsService } from 'src/comments/comments.service';
 import { TCurrentUser } from './types/current-user.type';
 import { USER_ROLE } from 'src/common/app.constants';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly userRepository: UserRepository,
-    private readonly postService: PostsService,
-    private readonly commentService: CommentsService,
-  ) {}
+  private readonly logger = new Logger(UsersService.name);
+  constructor(private readonly userRepository: UserRepository) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { email, ...rest } = createUserDto;
     const existingUser = await this.userRepository.countBy({ email });
-    if (existingUser)
+
+    if (existingUser) {
+      this.logger.warn(`Tried to signup with existing email ${email}`);
       throw new ConflictException(`User with email "${email}" already exists!`);
+    }
 
     return this.userRepository.createUser({ email, ...rest });
   }
@@ -48,8 +47,12 @@ export class UsersService {
 
   async updateUser(userId: number, updateUserDto: UpdateUserDto) {
     const user = await this.findUserById(userId);
-    if (!user)
+    if (!user) {
+      this.logger.warn("Trying to access user which doesn't exists!", {
+        userId,
+      });
       throw new NotFoundException(`No such user found with ${userId} id.`);
+    }
 
     return this.userRepository.save({ ...user, ...updateUserDto });
   }
@@ -61,6 +64,9 @@ export class UsersService {
     const userInfo = await this.findUserById(userId);
 
     if (!userInfo) {
+      this.logger.warn("Trying to access user which doesn't exists!", {
+        userId,
+      });
       throw new NotFoundException(`No such user found with id : ${userId}`);
     }
 
@@ -68,6 +74,10 @@ export class UsersService {
     const isUserOwnsThisAccount = user.id === userId;
 
     if (!isUserAdmin && !isUserOwnsThisAccount) {
+      this.logger.warn('Trying to delete others account', {
+        currentUser: user,
+        deletionUserId: userId,
+      });
       throw new UnauthorizedException(
         `You don't have sufficient access to delete this user.`,
       );

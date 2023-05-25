@@ -10,6 +10,7 @@ import {
   Body,
   UnauthorizedException,
   HttpCode,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -36,6 +37,8 @@ import { ApiSuccessResponseDto } from 'src/common/api-responses/ApiSuccessRespon
 @ApiTags('Users')
 @ApiBearerAuth()
 export class UsersController {
+  private logger = new Logger(UsersController.name);
+
   constructor(private readonly userService: UsersService) {}
 
   @Get()
@@ -69,7 +72,12 @@ export class UsersController {
   ): Promise<User> {
     const user = await this.userService.findUserById(userId);
     if (!user) {
-      throw new NotFoundException(`No such user exists with id : ${userId}`);
+      {
+        this.logger.warn("Trying to access user which doesn't exists", {
+          userId,
+        });
+        throw new NotFoundException(`No such user exists with id : ${userId}`);
+      }
     }
     return user;
   }
@@ -90,7 +98,13 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @CurrentUser() user: TCurrentUser,
   ): Promise<User> {
-    if (userId !== user.id) throw new UnauthorizedException();
+    if (userId !== user.id) {
+      this.logger.warn("Trying to update another user's info", {
+        currentUser: user,
+        userId,
+      });
+      throw new UnauthorizedException();
+    }
     return this.userService.updateUser(userId, updateUserDto);
   }
 

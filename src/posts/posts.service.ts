@@ -1,6 +1,7 @@
 import {
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
   forwardRef,
@@ -16,6 +17,8 @@ import { CommentsService } from 'src/comments/comments.service';
 
 @Injectable()
 export class PostsService {
+  private logger = new Logger(PostsService.name);
+
   constructor(
     @InjectRepository(Post) private readonly postsRepository: PostRepository,
     @Inject(forwardRef(() => CommentsService))
@@ -54,8 +57,13 @@ export class PostsService {
       authorId: userId,
     });
 
-    if (!post)
+    if (!post) {
+      this.logger.warn("Trying to update post which doesn't exists", {
+        userId,
+        postId,
+      });
       throw new NotFoundException(`No such post found with id : ${postId}`);
+    }
 
     return this.postsRepository.save({ ...post, ...updatePostDto });
   }
@@ -68,6 +76,10 @@ export class PostsService {
     const post = await this.fetchPostOfUserById(userId, postId);
 
     if (!post) {
+      this.logger.warn("Trying to delete post which doesn't exists", {
+        userId,
+        postId,
+      });
       throw new NotFoundException(`No such post found with id : ${postId}`);
     }
 
@@ -75,6 +87,10 @@ export class PostsService {
     const isUserOwnsPost = user.id === post.authorId;
 
     if (!isUserAdmin && !isUserOwnsPost) {
+      this.logger.warn('Trying to update post with insufficient access.', {
+        userId,
+        postId,
+      });
       throw new UnauthorizedException();
     }
 

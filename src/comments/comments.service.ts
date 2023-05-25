@@ -1,6 +1,7 @@
 import {
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
   forwardRef,
@@ -15,6 +16,8 @@ import { USER_ROLE } from 'src/common/app.constants';
 
 @Injectable()
 export class CommentsService {
+  private logger = new Logger(CommentsService.name);
+
   constructor(
     private readonly commentRepository: CommentRepository,
     @Inject(forwardRef(() => PostsService))
@@ -26,8 +29,13 @@ export class CommentsService {
     postId: number,
   ): Promise<Array<Comment>> {
     const post = await this.postService.fetchPostOfUserById(userId, postId);
-    if (!post)
+    if (!post) {
+      this.logger.warn(
+        'Trying to access comment of post which does not exists!',
+        { userId, postId },
+      );
       throw new NotFoundException(`No such post exists with id : ${postId}`);
+    }
 
     return this.commentRepository.find({ where: { postId } });
   }
@@ -39,8 +47,13 @@ export class CommentsService {
   ): Promise<Comment> {
     const post = await this.postService.fetchPostOfUserById(userId, postId);
 
-    if (!post)
+    if (!post) {
+      this.logger.warn(
+        'Trying to access comment of post which does not exists!',
+        { userId, postId },
+      );
       throw new NotFoundException(`No such post exists with id : ${postId}`);
+    }
 
     return this.commentRepository.findOneBy({ postId, id: commentId });
   }
@@ -53,8 +66,13 @@ export class CommentsService {
   ): Promise<Comment> {
     const post = await this.postService.fetchPostOfUserById(userId, postId);
 
-    if (!post)
+    if (!post) {
+      this.logger.warn(
+        'Trying to access comment of post which does not exists!',
+        { userId, postId },
+      );
       throw new NotFoundException(`No such post exists with id : ${postId}`);
+    }
 
     const comment = this.commentRepository.create({
       ...createCommentDto,
@@ -77,10 +95,15 @@ export class CommentsService {
         commentId,
       );
 
-    if (!commentInfo)
+    if (!commentInfo) {
+      this.logger.warn('Trying to delete comment which does not exists!', {
+        userId,
+        postId,
+      });
       throw new NotFoundException(
         `No such comment exists with id : ${commentId}`,
       );
+    }
 
     const isUserAdmin = user.role === USER_ROLE.ADMIN;
     const isUserOwnsPost = commentInfo.post.authorId === user.id;
@@ -95,7 +118,6 @@ export class CommentsService {
   }
 
   async deleteCommentsOfPost(postId: number): Promise<void> {
-    console.log(postId);
     this.commentRepository.delete({ postId });
   }
 

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Logger,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -38,6 +39,7 @@ import { ApiSuccessResponseDto } from 'src/common/api-responses/ApiSuccessRespon
 @ApiTags('Posts')
 @ApiBearerAuth()
 export class PostsController {
+  private logger = new Logger(PostsController.name);
   constructor(private readonly postService: PostsService) {}
 
   @Get()
@@ -74,6 +76,9 @@ export class PostsController {
     const post = await this.postService.fetchPostOfUserById(userId, postId);
 
     if (!post) {
+      this.logger.warn("Trying to access post which doesn't exists", {
+        postId,
+      });
       throw new NotFoundException(`No such post found with id : ${postId}`);
     }
 
@@ -95,7 +100,13 @@ export class PostsController {
     @CurrentUser() user: TCurrentUser,
     @Body() createPostDto: CreatePostDto,
   ): Promise<PostEntity> {
-    if (userId !== user.id) throw new UnauthorizedException();
+    if (userId !== user.id) {
+      this.logger.warn('Unauthorized operator of crating post', {
+        userId,
+        user,
+      });
+      throw new UnauthorizedException();
+    }
     return this.postService.createPost(user, createPostDto);
   }
 
@@ -117,7 +128,13 @@ export class PostsController {
     @Body() updatePostDto: UpdatePostDto,
     @CurrentUser() user: TCurrentUser,
   ): Promise<PostEntity> {
-    if (userId !== user.id) throw new UnauthorizedException();
+    if (userId !== user.id) {
+      this.logger.warn('Trying to update post of another author', {
+        user,
+        userId,
+      });
+      throw new UnauthorizedException();
+    }
     return this.postService.updatePost(userId, postId, updatePostDto);
   }
 

@@ -8,6 +8,7 @@ import {
   Post,
   Req,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -41,6 +42,7 @@ import { ApiBadRequestResponseDto } from 'src/common/api-responses/ApiBadRequest
 @Controller('auth')
 @ApiTags('Auth')
 export class AuthController {
+  private logger = new Logger(AuthController.name);
   constructor(private readonly authService: AuthService) {}
 
   @Post('/sign-up')
@@ -54,6 +56,9 @@ export class AuthController {
     description: 'User with email already exists!',
   })
   signUp(@Body() createUserDto: CreateUserDto): Promise<User> {
+    this.logger.log(
+      `Creating new user with payload = ${JSON.stringify(createUserDto)}`,
+    );
     return this.authService.signUp(createUserDto);
   }
 

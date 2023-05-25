@@ -47,6 +47,7 @@ import { UtilsModule } from 'src/utils/util.module';
           password: configService.get<string>('DB_PASSWORD'),
           synchronize: process.env.NODE_ENV === 'development',
           autoLoadEntities: true,
+          // logging: process.env.NODE_ENV === 'development',
         };
       },
     }),

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -24,6 +25,7 @@ import { ForgotPasswordResponseDto } from './dtos/forgot-password-response.dto';
 
 @Injectable()
 export class AuthService {
+  private logger = new Logger(AuthService.name);
   constructor(
     private readonly userService: UsersService,
     private readonly configService: ConfigService,
@@ -44,7 +46,7 @@ export class AuthService {
     return existingUser;
   }
 
-  async signIn(user: Omit<User, 'password'>): Promise<SignInResponseDto> {
+  async signIn(user: TCurrentUser): Promise<SignInResponseDto> {
     const signInPayload = { userId: user.id };
 
     const accessTokenSignInOptions: JwtSignOptions = {
@@ -77,8 +79,13 @@ export class AuthService {
     const { email } = forgotPasswordDto;
     const existingUser = await this.userService.findUserByEmail(email);
 
-    if (!existingUser)
+    if (!existingUser) {
+      this.logger.warn(
+        'Trying to reset password with email.',
+        forgotPasswordDto,
+      );
       throw new NotFoundException(`No such user found with "${email}"`);
+    }
 
     const jwtTokenSecret = this.configService.get<string>('JWT_SECRET');
     const secret = this.getPasswordTokenSigningSecret(
@@ -113,7 +120,13 @@ export class AuthService {
 
     let user = await this.userService.findUserById(id);
 
-    if (!user) throw new BadRequestException('Invalid link!');
+    if (!user) {
+      this.logger.warn(
+        `Trying to reset password with invalid {id} & {token}`,
+        resetPasswordParamsDto,
+      );
+      throw new BadRequestException('Invalid link!');
+    }
 
     const jwtTokenSecret = this.configService.get<string>('JWT_SECRET');
     const secret = this.getPasswordTokenSigningSecret(
@@ -135,6 +148,7 @@ export class AuthService {
         throw new BadRequestException('Invalid token!');
       }
     } catch (error) {
+      this.logger.error('Error in reset password api', error);
       throw new BadRequestException('Invalid link!');
     }
   }
@@ -146,11 +160,14 @@ export class AuthService {
     const { oldPassword, newPassword } = changePasswordDto;
 
     const user = await this.userService.findUserById(currentUser.id);
-    if (!user) throw new NotFoundException(`User doesn't exists!`);
-
     const isValidPassword = user.validatePassword(oldPassword);
 
-    if (!isValidPassword) throw new BadRequestException(`Invalid password!`);
+    if (!isValidPassword) {
+      this.logger.warn(
+        `User with id : ${currentUser.id} is trying to change password with wrong old password`,
+      );
+      throw new BadRequestException(`Invalid password!`);
+    }
 
     user.password = await this.hashPasswrd(newPassword);
     this.userService.saveUser(user);
@@ -164,7 +181,10 @@ export class AuthService {
     const { userId } = await this.jwtHelper.verifyToken(refreshToken);
     const storedToken = await this.redisUtils.getValue(userId.toString());
 
-    if (storedToken !== refreshToken) throw new UnauthorizedException();
+    if (storedToken !== refreshToken) {
+      this.logger.warn('Trying to use old refresh token');
+      throw new UnauthorizedException();
+    }
 
     const accessTokenSignInOptions: JwtSignOptions = {
       expiresIn: '7d',

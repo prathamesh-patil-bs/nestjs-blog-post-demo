@@ -1,10 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthService } from './auth.service';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
+  private readonly logger = new Logger(LocalStrategy.name);
+
   constructor(private readonly authService: AuthService) {
     super({
       usernameField: 'email',
@@ -18,7 +20,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       password,
     });
 
-    if (!user) throw new UnauthorizedException('Invalid Credentials!');
+    if (!user) {
+      this.logger.warn(`Tried to login with envalid credentials`, {
+        email: username,
+        password,
+      });
+      throw new UnauthorizedException('Invalid Credentials!');
+    }
     return user;
   }
 }

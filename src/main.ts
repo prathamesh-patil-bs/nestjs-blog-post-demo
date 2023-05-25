@@ -20,7 +20,6 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Post Comment Demo')
     .setDescription('Post Comment API Description')
-    .setBasePath('/api/')
     .setVersion('1.0')
     .setContact(
       'Prathamesh Patil',
