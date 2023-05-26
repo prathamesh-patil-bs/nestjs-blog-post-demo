@@ -6,15 +6,20 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
   OneToMany,
+  DeepPartial,
 } from 'typeorm';
 import { hash } from 'bcrypt';
 import { compare } from 'bcrypt';
-import { USER_ROLE } from 'src/common/app.constants';
+import { USER_ROLE } from '../common/app.constants';
 import { Post } from 'src/posts/post.entity';
 import { Comment } from 'src/comments/comment.entity';
 
 @Entity({ name: 'users' })
 export class User {
+  constructor(obj: DeepPartial<User>) {
+    return Object.assign(this, obj);
+  }
+
   @PrimaryGeneratedColumn()
   id: number;
 
