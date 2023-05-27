@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserRepository } from './users.repository';
+import { UserRepository } from '../users.repository';
 import { DataSource } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../user.entity';
 
 describe('UserRepository', () => {
   let repository: UserRepository;
@@ -31,11 +31,11 @@ describe('UserRepository', () => {
 
   describe('createUser', () => {
     const createUserDto = {
-      firstName: 'parth',
-      lastName: 'patel',
-      age: 25,
-      email: 'parth@gmail.com',
-      password: 'parth123',
+      firstName: 'shivani',
+      lastName: 'patil',
+      email: 'shivani@gmail.com',
+      age: 24,
+      password: 'shivani123',
     };
 
     const user = new User({

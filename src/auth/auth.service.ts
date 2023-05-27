@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtSignOptions } from '@nestjs/jwt';
 import { hash } from 'bcrypt';
+import _ from 'lodash';
 
 import { JwtHelper } from '../utils/jwt.util';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
@@ -43,7 +44,13 @@ export class AuthService {
 
     const isValidPassword = await existingUser.validatePassword(password);
     if (!isValidPassword) return null;
-    return existingUser;
+    return _.pick(existingUser, [
+      'id',
+      'firstName',
+      'lastName',
+      'email',
+      'role',
+    ]);
   }
 
   async signIn(user: TCurrentUser): Promise<SignInResponseDto> {
@@ -155,7 +162,7 @@ export class AuthService {
 
   async changePassword(
     changePasswordDto: ChangePasswordDto,
-    currentUser: Omit<User, 'password'>,
+    currentUser: TCurrentUser,
   ): Promise<string> {
     const { oldPassword, newPassword } = changePasswordDto;
 
