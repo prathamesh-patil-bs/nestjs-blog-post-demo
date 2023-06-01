@@ -4,10 +4,10 @@ import { AuthService } from '../auth.service';
 import { UsersService } from 'src/users/users.service';
 import { JwtHelper } from 'src/utils/jwt.util';
 import { RedisUtils } from 'src/utils/redis.util';
-import { FakeConfigService } from './mocks/fake-config.service';
-import { FakeJwtHelper } from '../../utils/tests/mocks/fake-jwtHelper.util';
-import { FakeRedisUtils } from '../../utils/tests/mocks/fake-redisUtils.util';
-import { FakeUserService } from '../../users/tests/fake-user.service';
+import { ConfigServiceMock } from './mocks/config.service.mock';
+import { JwtHelperMock } from '../../utils/tests/mocks/jwt.util.mock';
+import { RedisUtilsMock } from '../../utils/tests/mocks/redis.util.mock';
+import { UserServiceMock } from '../../users/tests/mocks/user.service.mock';
 import {
   BadRequestException,
   NotFoundException,
@@ -40,19 +40,19 @@ describe('AuthService', () => {
         AuthService,
         {
           provide: UsersService,
-          useClass: FakeUserService,
+          useClass: UserServiceMock,
         },
         {
           provide: ConfigService,
-          useClass: FakeConfigService,
+          useClass: ConfigServiceMock,
         },
         {
           provide: JwtHelper,
-          useClass: FakeJwtHelper,
+          useClass: JwtHelperMock,
         },
         {
           provide: RedisUtils,
-          useClass: FakeRedisUtils,
+          useClass: RedisUtilsMock,
         },
       ],
     }).compile();

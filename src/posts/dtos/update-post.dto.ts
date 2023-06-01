@@ -5,10 +5,10 @@ export class UpdatePostDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  title: string;
+  title?: string;
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  text: string;
+  text?: string;
 }

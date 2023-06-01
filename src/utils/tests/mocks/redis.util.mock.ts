@@ -1,4 +1,4 @@
-export class FakeRedisUtils {
+export class RedisUtilsMock {
   deleteValue(key: string) {
     return Promise.resolve(1);
   }

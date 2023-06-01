@@ -1,10 +1,8 @@
 import {
-  Inject,
   Injectable,
   Logger,
   NotFoundException,
   UnauthorizedException,
-  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './post.entity';
@@ -13,7 +11,6 @@ import { CreatePostDto } from './dtos/create-post.dto';
 import { TCurrentUser } from 'src/users/types/current-user.type';
 import { UpdatePostDto } from './dtos/update-post.dto';
 import { USER_ROLE } from 'src/common/app.constants';
-import { CommentsService } from 'src/comments/comments.service';
 
 @Injectable()
 export class PostsService {
@@ -21,8 +18,6 @@ export class PostsService {
 
   constructor(
     @InjectRepository(Post) private readonly postsRepository: PostRepository,
-    @Inject(forwardRef(() => CommentsService))
-    private readonly commentService: CommentsService,
   ) {}
 
   fetchPostOfUser(userId: number): Promise<Array<Post>> {
@@ -97,12 +92,5 @@ export class PostsService {
     await this.postsRepository.delete({ id: postId });
 
     return { message: 'Post deleted successfully.' };
-  }
-
-  async deletePostsOfUser(userId: number): Promise<void> {
-    const posts = await this.fetchPostOfUser(userId);
-    await this.commentService.deleteCommentsOfPosts(
-      posts.map((post) => post.id),
-    );
   }
 }

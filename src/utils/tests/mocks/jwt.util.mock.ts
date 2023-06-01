@@ -1,7 +1,7 @@
 import { JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
 import { JwtPayloadType } from 'src/auth/types/auth.type';
 
-export class FakeJwtHelper {
+export class JwtHelperMock {
   signAccessToken(
     tokenPaylod: { [key: string]: any },
     jwtSignOptions: JwtSignOptions,

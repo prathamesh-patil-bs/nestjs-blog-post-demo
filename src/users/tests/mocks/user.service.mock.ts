@@ -1,7 +1,7 @@
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 import { User } from 'src/users/user.entity';
 
-export class FakeUserService {
+export class UserServiceMock {
   users: User[] = [];
 
   createUser(createUserDto: CreateUserDto) {

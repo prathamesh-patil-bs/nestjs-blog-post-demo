@@ -9,10 +9,15 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  DeepPartial,
 } from 'typeorm';
 
 @Entity({ name: 'posts' })
 export class Post {
+  constructor(entityLike: DeepPartial<Post>) {
+    return Object.assign(this, entityLike);
+  }
+
   @PrimaryGeneratedColumn()
   id: number;
 

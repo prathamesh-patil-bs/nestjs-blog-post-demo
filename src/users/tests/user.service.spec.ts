@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from '../users.service';
 import { UserRepository } from '../users.repository';
-import { FakeUserRepository } from './mocks/fake-user-repository';
+import { UserRepositoryMock } from './mocks/user.repository.mock';
 import {
   ConflictException,
   NotFoundException,
@@ -21,7 +21,7 @@ describe('UserService', () => {
         UsersService,
         {
           provide: UserRepository,
-          useClass: FakeUserRepository,
+          useClass: UserRepositoryMock,
         },
       ],
     }).compile();

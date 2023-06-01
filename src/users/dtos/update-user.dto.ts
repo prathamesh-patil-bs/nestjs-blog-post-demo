@@ -13,23 +13,23 @@ export class UpdateUserDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  firstName: string;
+  firstName?: string;
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  lastName: string;
+  lastName?: string;
 
   @IsNumber()
   @IsPositive()
   @Min(12)
   @Max(100)
   @IsOptional()
-  age: number;
+  age?: number;
 
   @IsString()
   @IsNotEmpty()
   @IsEmail()
   @IsOptional()
-  email: string;
+  email?: string;
 }
