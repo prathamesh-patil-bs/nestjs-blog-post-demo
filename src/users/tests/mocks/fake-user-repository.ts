@@ -1,6 +1,6 @@
 import { DeepPartial, FindManyOptions, FindOptionsWhere } from 'typeorm';
-import { User } from '../user.entity';
-import { CreateUserDto } from '../dtos/create-user.dto';
+import { User } from '../../user.entity';
+import { CreateUserDto } from '../../dtos/create-user.dto';
 
 export class FakeUserRepository {
   users: User[] = [];

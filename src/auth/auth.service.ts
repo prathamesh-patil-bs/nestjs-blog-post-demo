@@ -8,7 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtSignOptions } from '@nestjs/jwt';
 import { hash } from 'bcrypt';
-import _ from 'lodash';
+import * as _ from 'lodash';
 
 import { JwtHelper } from '../utils/jwt.util';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
@@ -43,7 +43,10 @@ export class AuthService {
     if (!existingUser) return null;
 
     const isValidPassword = await existingUser.validatePassword(password);
-    if (!isValidPassword) return null;
+    if (!isValidPassword) {
+      return null;
+    }
+
     return _.pick(existingUser, [
       'id',
       'firstName',
@@ -147,7 +150,6 @@ export class AuthService {
       });
 
       user = await this.userService.findUserById(payload.userId);
-
       if (user) {
         user.password = await this.hashPasswrd(password);
         await this.userService.saveUser(user);

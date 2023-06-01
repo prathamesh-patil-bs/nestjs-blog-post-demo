@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from '../users.service';
 import { UserRepository } from '../users.repository';
-import { FakeUserRepository } from './fake-user-repository';
+import { FakeUserRepository } from './mocks/fake-user-repository';
 import {
   ConflictException,
   NotFoundException,
