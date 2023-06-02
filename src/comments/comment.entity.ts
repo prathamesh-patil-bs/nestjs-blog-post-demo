@@ -3,6 +3,7 @@ import { User } from 'src/users/user.entity';
 import {
   Column,
   CreateDateColumn,
+  DeepPartial,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -12,6 +13,10 @@ import {
 
 @Entity({ name: 'comments' })
 export class Comment {
+  constructor(obj: DeepPartial<Comment>) {
+    return Object.assign(this, obj);
+  }
+
   @PrimaryGeneratedColumn()
   id: number;
 

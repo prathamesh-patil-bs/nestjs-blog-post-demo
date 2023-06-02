@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PostsService } from '../posts.service';
-import { PostRepositoryMock } from './mocks/post.repository.mock';
+import { PostRepositoryMock } from './mocks/posts.repository.mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Post } from '../post.entity';
 import { TCurrentUser } from 'src/users/types/current-user.type';

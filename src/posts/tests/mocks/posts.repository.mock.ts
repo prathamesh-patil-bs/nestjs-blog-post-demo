@@ -11,6 +11,7 @@ export class PostRepositoryMock {
       text,
       title,
       authorId: author.id,
+      author,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

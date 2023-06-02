@@ -4,7 +4,6 @@ import {
   Logger,
   NotFoundException,
   UnauthorizedException,
-  forwardRef,
 } from '@nestjs/common';
 import { In } from 'typeorm';
 import { CreateCommentDto } from './dtos/create-comment.dto';
@@ -20,7 +19,6 @@ export class CommentsService {
 
   constructor(
     private readonly commentRepository: CommentRepository,
-    @Inject(forwardRef(() => PostsService))
     private readonly postService: PostsService,
   ) {}
 
@@ -68,7 +66,7 @@ export class CommentsService {
 
     if (!post) {
       this.logger.warn(
-        'Trying to access comment of post which does not exists!',
+        'Trying to create comment on post which does not exists!',
         { userId, postId },
       );
       throw new NotFoundException(`No such post exists with id : ${postId}`);
@@ -115,17 +113,5 @@ export class CommentsService {
 
     await this.commentRepository.delete({ id: commentId });
     return { message: 'Comment deleted successfully!' };
-  }
-
-  async deleteCommentsOfPost(postId: number): Promise<void> {
-    this.commentRepository.delete({ postId });
-  }
-
-  async deleteCommentsOfPosts(postIds: Array<number>): Promise<void> {
-    this.commentRepository.delete({ id: In(postIds) });
-  }
-
-  async deleteCommentsOfUser(userId: number): Promise<void> {
-    this.commentRepository.delete({ userId });
   }
 }
