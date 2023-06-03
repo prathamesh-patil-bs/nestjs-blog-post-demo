@@ -1,6 +1,6 @@
-import { RedisService } from '@liaoliaots/nestjs-redis';
-import { Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
+import { Injectable } from '@nestjs/common';
+import { RedisService } from '@liaoliaots/nestjs-redis';
 
 @Injectable()
 export class RedisUtils {

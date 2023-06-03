@@ -1,9 +1,10 @@
+import { join } from 'path';
+import * as fs from 'fs/promises';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { join } from 'path';
-import * as fs from 'fs/promises';
-import { AppModule } from './app/app.module';
+
+import { AppModule } from '@modules/app/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,8 +13,8 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      stopAtFirstError: true,
       transform: true,
+      stopAtFirstError: true,
     }),
   );
 

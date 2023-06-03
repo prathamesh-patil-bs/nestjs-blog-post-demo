@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
-import { JwtPayloadType } from 'src/auth/types/auth.type';
+
+import { JwtPayloadType } from '@modules/auth/typings/auth.type';
 
 export class JwtHelperMock {
   signAccessToken(
-    tokenPaylod: { [key: string]: any },
+    tokenPayload: { [key: string]: any },
     jwtSignOptions: JwtSignOptions,
   ) {
     return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMsImlhdCI6MTY4NTAwNjM4NiwiZXhwIjoxNjg1NjExMTg2LCJhdWQiOiJodHRwOi8vbG9jYWxob3N0IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwIiwic3ViIjoiMyJ9.47ukDZtOju2rrsOyj5HPbJxP8p6PRFyxjA8XYE-jeK8';

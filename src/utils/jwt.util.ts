@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions, JwtVerifyOptions } from '@nestjs/jwt';
-import { RedisUtils } from './redis.util';
-import { JwtPayloadType } from 'src/auth/types/auth.type';
+
+import { RedisUtils } from '@utils/redis.util';
+import { JwtPayloadType } from '@modules/auth/typings/auth.type';
 
 @Injectable()
 export class JwtHelper {

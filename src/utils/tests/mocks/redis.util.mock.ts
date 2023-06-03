@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export class RedisUtilsMock {
   deleteValue(key: string) {
     return Promise.resolve(1);
